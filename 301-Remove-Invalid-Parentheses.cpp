@@ -19,19 +19,30 @@ public:
         return st.empty();
     }
     void solve(string s, int totalRem, set<string>& ans){
-        if(totalRem<0) return;
-        if(mp.find(s)!=mp.end()) return;
-        mp[s]++;
-        if(totalRem == 0){
-            if(validStr(s))
-                ans.insert(s);
-            return;
+        queue<string>pq;
+        pq.push(s);
+        while(!pq.empty()){
+            int size = pq.size();
+            while(size>0){
+                string curr = pq.front();
+                if(mp.find(curr) != mp.end()){
+                    pq.pop();
+                    break;
+                }
+                mp[curr]++;
+                if(curr.length() == s.length() - totalRem  && validStr(curr)){
+                    ans.insert(curr);
+                }
+                for(int i=0; i<curr.length(); i++){
+                    string left = curr.substr(0, i);
+                    string right = curr.substr(i+1, curr.length());
+                    pq.push(left+right);
+                }
+                size--;
+                pq.pop();
+            }
         }
-        for(int i=0;i<s.length(); i++){
-            string left = s.substr(0, i);
-            string right = s.substr(i+1, s.length());
-            solve(left+right, totalRem-1, ans);
-        }
+        
     }
     vector<string> removeInvalidParentheses(string s) {
         stack<char>st;
