@@ -1,69 +1,56 @@
 class Solution {
-public:
-    unordered_map<string, int>mp;
-    bool validStr(string s){
-        stack<char>st;
-        int i=0;
+    bool isValid(string s){
+        int c = 0, i=0;
         while(i<s.length()){
-            if(s[i] == '('){
-                st.push(s[i]);
-            }else if(s[i] == ')'){
-                if(!st.empty() && st.top() == '('){
-                    st.pop();
-                }else{
-                     st.push(s[i]);
-                }
-            }
+            if(s[i] =='(') c++;
+            if(s[i]==')') c--;
+            if(c<0) return false;
             i++;
         }
-        return st.empty();
+        return c==0;
     }
-    void solve(string s, int totalRem, set<string>& ans){
+public:
+    vector<string> removeInvalidParentheses(string s) {
+        unordered_set<string>visited;
         queue<string>pq;
+        vector<string>res;
+        int i=0;
+        if(s == \\) {
+            res.push_back(\\);
+            return res;
+        }
         pq.push(s);
+        visited.insert(s);
+        bool found = false;
+
         while(!pq.empty()){
             int size = pq.size();
+            //level refers to all the strings with the same number of parentheses removed:
             while(size>0){
                 string curr = pq.front();
-                if(mp.find(curr) != mp.end()){
-                    pq.pop();
-                    break;
+                if(isValid(curr)){
+                    found = true;
+                    res.push_back(curr);
                 }
-                mp[curr]++;
-                if(curr.length() == s.length() - totalRem  && validStr(curr)){
-                    ans.insert(curr);
-                }
-                for(int i=0; i<curr.length(); i++){
-                    string left = curr.substr(0, i);
-                    string right = curr.substr(i+1, curr.length());
-                    pq.push(left+right);
-                }
-                size--;
-                pq.pop();
-            }
-        }
-        
-    }
-    vector<string> removeInvalidParentheses(string s) {
-        stack<char>st;
-        int i=0;
+                if(found) {
 
-        while(i<s.length()){
-            if(s[i] == '('){
-                st.push(s[i]);
-            }else if(s[i] == ')'){
-                if(!st.empty() && st.top() == '('){
-                    st.pop();
                 }else{
-                     st.push(s[i]);
+                    for(int i=0; i<curr.length(); i++){
+                        if(s[i] != '(' && s[i]!= ')') continue;
+                        string left = curr.substr(0, i);
+                        string right = curr.substr(i+1, curr.length()-1);
+                        if(visited.find(left+right) == visited.end()){
+                            visited.insert(left+right);
+                            pq.push(left+right);
+                        }
+                    }
+                
                 }
-            }
-            i++;
+                pq.pop();
+                size--;
+            }    
+            if(found) break;
         }
-        int totalRem = st.size();
-        set<string> ans;
-        solve(s, totalRem, ans);
-        vector<string>res(ans.begin(), ans.end());
         return res;
     }
 };
